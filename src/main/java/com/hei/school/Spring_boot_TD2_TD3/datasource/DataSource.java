@@ -8,8 +8,8 @@ import java.sql.SQLException;
 @Component
 public class DataSource {
     private static final String JDBC_URL = "jdbc:postgresql://localhost:5432/mini_dish_db";
-    private static final String USERNAME = "mini_dish_db_manager";
-    private static final String PASSWORD = "123456";
+    private static final String USERNAME = "postgres";
+    private static final String PASSWORD = "lavorary";
 
     public Connection getConnection() {
         try {

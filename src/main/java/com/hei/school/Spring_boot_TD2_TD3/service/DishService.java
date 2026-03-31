@@ -22,6 +22,12 @@ public class DishService {
         return dishRepository.findAll();
     }
 
+    public List<Ingredient> findIngredientsByDishId(int dishId, String ingredientName, Double ingredientPriceAround) {
+    findById(dishId);
+
+    return dishRepository.findIngredientsByDishId(dishId, ingredientName, ingredientPriceAround);
+}
+
     public Dish findById(int id) {
         Dish dish = dishRepository.findById(id);
         if (dish == null) {

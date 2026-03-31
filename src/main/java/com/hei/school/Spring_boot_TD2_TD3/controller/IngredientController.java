@@ -22,7 +22,11 @@ public class IngredientController {
 
     @GetMapping("/ingredients")
     public ResponseEntity<List<Ingredient>> findAll() {
-        return ResponseEntity.ok(ingredientService.findAll());
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .header("Content-Type", "application/json")
+                .body(ingredientService.findAll());
+
     }
 
     @GetMapping("/ingredients/{id}")

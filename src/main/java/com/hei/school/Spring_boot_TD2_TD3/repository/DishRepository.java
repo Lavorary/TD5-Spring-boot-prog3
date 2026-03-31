@@ -114,4 +114,53 @@ public class DishRepository {
         }
         return dishes;
     }
+
+    public List<Ingredient> findIngredientsByDishId(int dishId, String ingredientName, Double ingredientPriceAround) {
+    List<Ingredient> ingredients = new ArrayList<>();
+    StringBuilder sql = new StringBuilder("""
+            SELECT i.id, i.name, i.price, i.category
+            FROM ingredient i
+            JOIN dish_ingredient di ON i.id = di.id_ingredient
+            WHERE di.id_dish = ?
+            """);
+
+    if (ingredientName != null) {
+        sql.append(" AND i.name ILIKE ?");
+    }
+    if (ingredientPriceAround != null) {
+        sql.append(" AND i.price BETWEEN ? AND ?");
+    }
+
+    try (Connection conn = dataSource.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+        int index = 1;
+        stmt.setInt(index++, dishId);
+
+        if (ingredientName != null) {
+            stmt.setString(index++, "%" + ingredientName + "%");
+        }
+        if (ingredientPriceAround != null) {
+            stmt.setDouble(index++, ingredientPriceAround - 50);
+            stmt.setDouble(index++, ingredientPriceAround + 50);
+        }
+
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            ingredients.add(mapIngredientFromResultSet(rs));
+        }
+    } catch (SQLException e) {
+        throw new RuntimeException(e);
+    }
+    return ingredients;
+}
+
+private Ingredient mapIngredientFromResultSet(ResultSet rs) throws SQLException {
+    return Ingredient.builder()
+            .id(rs.getInt("id"))
+            .name(rs.getString("name"))
+            .price(rs.getDouble("price"))
+            .category(CategoryEnum.valueOf(rs.getString("category")))
+            .build();
+}
 }
