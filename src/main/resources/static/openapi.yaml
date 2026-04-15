@@ -1,0 +1,184 @@
+openapi: 3.1.0
+info:
+  title: Title
+  description: Title
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8080'
+paths:
+  # GET /ingredients
+  /ingredients :
+    get :
+      summary: Get all ingredients
+      responses:
+        200:
+          description: List of ingredients
+          content:
+            application/json :
+              schema:
+                type: array
+                items :
+                  $ref : '#/components/schemas/Ingredient'
+
+## GET /ingredients/{id}
+  /ingredients/{id} :
+    get :
+      summary : get ingredient by id
+      parameters :
+        - name : id
+          in : path
+          required : true
+          schema :
+            type : integer
+      responses :
+        200 :
+          description : Ingredient with it's id found
+          content :
+            application/json :
+              schema :
+                $ref : '#/components/schemas/Ingredient'
+        404 :
+          description : Error, Ingredient not found
+          content :
+            text/plain :
+              schema :
+                type : string
+              example : "Ingredient.id=1 is not found"
+
+  #  GET /ingredients/{id}/stock?at={temporal}&unit={unit}
+  /ingredient/{id}/stock :
+    get :
+      summary : Get stock value of an ingredient at a specific time
+      parameters:
+        - name : id
+          in : path
+          required: true
+          schema :
+            type : integer
+        - name : at
+          in : query
+          required : true
+          schema :
+            type : string
+            format : date-time
+            example : "2024-01-06T12:00:00Z"
+        - name : unit
+          in : query
+          required: true
+          schema:
+            type: string
+            enum : [PCS, KG, L]
+      responses :
+        200 :
+          description : Stock value found
+          content :
+            application/json :
+              schema :
+                $ref : '#/components/schemas/StockValue'
+        400 :
+          description : Missing mandatory query parameter
+          content :
+            text/plain :
+              schema :
+                type : string
+              example : "Either mandatory query parameter `at` or `unit` is not provided."
+        404 :
+          description : Ingredient not found
+          content :
+            text/plain :
+              schema :
+                type : string
+              example : "Ingredient.id=1 is not found"
+
+  # GET /dishes
+  /dishes :
+    get :
+      summary : Get all dishes
+      responses :
+        200 :
+          description: List of dishes
+          content:
+            application/json :
+              schema:
+                type: array
+                items :
+                  $ref : '#/components/schemas/Dish'
+
+  # PUT /dishes/{id}/ingredients
+  /dishes/{id}/ingredients :
+    put :
+      summary : Update ingredients of a Dish
+      parameters:
+        - name : id
+          in : path
+          required : true
+          schema :
+            type : integer
+      requestBody :
+        required: true
+        content:
+          application/json :
+            schema :
+              type : array
+              items :
+                $ref : '#/components/schemas/Ingredient'
+      responses :
+        400 :
+          description : Missing request body
+          content :
+            text/plain :
+              schema :
+                type : string
+              example : "Request body is required."
+        404 :
+          description : Dish not found
+          content :
+            text/plain :
+              schema :
+                type : string
+              example : "Dish.id=1 not found"
+        200 :
+          description : Dish updated
+          content :
+            application/json :
+              schema :
+                $ref : '#/components/schemas/Dish'
+
+components:
+  schemas:
+    Ingredient :
+      type: object
+      properties:
+        id :
+          type: integer
+        name :
+          type : string
+        category :
+          type : string
+          enum : [VEGETABLE, ANIMAL, MARINE, DAIRY, OTHER]
+        price :
+          type : number
+
+    StockValue:
+      type: object
+      properties:
+        quantity:
+          type: number
+        unit:
+          type: string
+          enum: [PCS, KG, L]
+
+    Dish:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        sellingPrice:
+          type: number
+          nullable: true
+        ingredients:
+          type: array
+          items:
+            $ref: '#/components/schemas/Ingredient'
